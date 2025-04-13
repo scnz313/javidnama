@@ -1,0 +1,39 @@
+name: javiednama
+description: "A new Flutter project."
+publish_to: 'none' 
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.7.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+  fluttertoast: ^8.2.1
+  share_plus: ^7.2.1  # Update version
+  persian_fonts: ^1.0.0 # Replace Google Fonts with Persian Fonts
+  cupertino_icons: ^1.0.8
+  translator: ^1.0.3+1
+  flutter_slidable: ^3.0.1  # Add for swipe actions
+  shared_preferences: ^2.2.2  # Add for storing bookmarks/notes
+  screenshot: ^2.1.0  # Add for better image capture
+  path_provider: ^2.1.1  # Update version
+  google_fonts: ^6.1.0  # Add for additional fonts
+  
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/poems.json
+    - assets/lines_trans.json
+    - assets/definitions.json
+  fonts:
+    - family: Jameelnoori
+      fonts:
+        - asset: assets/fonts/Jameelnoori.ttf
