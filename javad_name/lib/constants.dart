@@ -89,7 +89,10 @@ enum ThemeType { light, dark, sepia }
 class AppTheme {
   // Current theme state
   static ThemeType currentTheme = ThemeType.light;
+  // Notifiers to rebuild UI on theme or font size change
+  static final ValueNotifier<ThemeType> themeNotifier = ValueNotifier(currentTheme);
   static double _fontSize = 1.0; // Scale factor for text size
+  static final ValueNotifier<double> fontSizeNotifier = ValueNotifier(_fontSize);
 
   // Get font scale factor
   static double get fontSize => _fontSize;
@@ -97,11 +100,13 @@ class AppTheme {
   // Set font scale factor
   static void setFontSize(double size) {
     _fontSize = size;
+    fontSizeNotifier.value = size;
   }
 
   // Set current theme
   static void setTheme(ThemeType theme) {
     currentTheme = theme;
+    themeNotifier.value = theme;
   }
 
   // Get theme data based on current theme type

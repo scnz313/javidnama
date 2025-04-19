@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "683597520754",
+    "firebase_url": "https://javied-nama-iqbal-default-rtdb.firebaseio.com",
+    "project_id": "javied-nama-iqbal",
+    "storage_bucket": "javied-nama-iqbal.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:683597520754:android:e8f16ff544f17efe3ac7eb",
+        "android_client_info": {
+          "package_name": "com.example.javad_name"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCj6OCp_SzJrQBJmFESfKJcdImyAcx1UG8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
