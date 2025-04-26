@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'firebase_options.dart';
@@ -35,56 +33,18 @@ Future<void> main() async {
   runApp(const ProviderScope(child: MyApp()));
 }
 
-class MyApp extends StatefulWidget {
+class MyApp extends ConsumerWidget {
   const MyApp({super.key});
 
   @override
-  State<MyApp> createState() => _MyAppState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final themeSettings = ref.watch(themeSettingsProvider);
+    final themeData = AppTheme.buildThemeData(themeSettings);
 
-class _MyAppState extends State<MyApp> {
-  @override
-  void initState() {
-    super.initState();
-    _loadThemePreferences();
-  }
-
-  Future<void> _loadThemePreferences() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final themeName = prefs.getString('theme_preference') ?? 'light';
-      ThemeType themeType;
-      switch (themeName) {
-        case 'dark':
-          themeType = ThemeType.dark;
-          break;
-        case 'sepia':
-          themeType = ThemeType.sepia;
-          break;
-        default:
-          themeType = ThemeType.light;
-      }
-      final fontSize = prefs.getDouble('font_size_factor') ?? 1.0;
-      setState(() {
-        AppTheme.setTheme(themeType);
-        AppTheme.setFontSize(fontSize);
-      });
-    } catch (e) {
-      debugPrint('Error loading theme preferences: $e');
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return ValueListenableBuilder<ThemeType>(
-      valueListenable: AppTheme.themeNotifier,
-      builder: (context, theme, child) {
-        return MaterialApp(
-          title: 'Javied Nama',
-          theme: AppTheme.getTheme(),
-          home: const MainScreen(),
-        );
-      },
+    return MaterialApp(
+      title: 'Javied Nama',
+      theme: themeData,
+      home: const MainScreen(),
     );
   }
 }
