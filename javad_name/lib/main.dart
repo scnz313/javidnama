@@ -7,6 +7,8 @@ import 'firebase_options.dart';
 import 'constants.dart';
 import 'screens/main_screen.dart';
 import 'controllers/theme_controller.dart';
+import 'screens/onboarding_screen.dart';
+import 'utils/onboarding_util.dart';
 
 // Only import web plugins when running on web
 // This avoids the dart:ui_web errors on non-web platforms
@@ -45,10 +47,23 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  bool _showOnboarding = false;
+  bool _isLoading = true;
+  
   @override
   void initState() {
     super.initState();
-    _loadThemePreferences();
+    _initializeApp();
+  }
+
+  Future<void> _initializeApp() async {
+    await _loadThemePreferences();
+    final shouldShowOnboarding = await OnboardingUtil.shouldShowOnboarding();
+    
+    setState(() {
+      _showOnboarding = shouldShowOnboarding;
+      _isLoading = false;
+    });
   }
 
   Future<void> _loadThemePreferences() async {
@@ -75,6 +90,12 @@ class _MyAppState extends State<MyApp> {
       debugPrint('Error loading theme preferences: $e');
     }
   }
+  
+  void _onOnboardingComplete() {
+    setState(() {
+      _showOnboarding = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -84,9 +105,41 @@ class _MyAppState extends State<MyApp> {
         return MaterialApp(
           title: 'Javied Nama',
           theme: AppTheme.getTheme(),
-          home: const MainScreen(),
+          home: _isLoading
+              ? const _LoadingScreen()
+              : _showOnboarding
+                  ? OnboardingScreen(onComplete: _onOnboardingComplete)
+                  : const MainScreen(),
         );
       },
+    );
+  }
+}
+
+// Simple loading screen to show while checking onboarding status
+class _LoadingScreen extends StatelessWidget {
+  const _LoadingScreen();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Just use an icon directly instead of trying to load a font file as an image
+            const Icon(
+              Icons.menu_book,
+              size: 100,
+              color: Color(0xFF614A19),
+            ),
+            const SizedBox(height: 24),
+            const CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF614A19)),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

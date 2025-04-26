@@ -69,9 +69,11 @@ class AppAnimations {
       duration: duration,
       curve: curve,
       builder: (context, value, child) {
+        // Ensure opacity is strictly between 0.0 and 1.0
+        final safeValue = value.clamp(0.0, 1.0);
         return Opacity(
-          opacity: value,
-          child: Transform.scale(scale: value, child: child),
+          opacity: safeValue,
+          child: Transform.scale(scale: safeValue, child: child),
         );
       },
       child: child,
