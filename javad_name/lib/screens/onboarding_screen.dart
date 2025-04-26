@@ -5,6 +5,7 @@ import '../constants.dart';
 import '../animations.dart';
 import '../components/font_preview_component.dart';
 import 'font_settings_screen.dart';
+import 'font_comparison_screen.dart';
 
 // Data structure for onboarding content
 class OnboardingPageData {
@@ -288,50 +289,95 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
     final isLastPage = _currentPage == onboardingPages.length - 1;
     final isFontPage = _currentPage == 1; // Index 1 is the Beautiful Fonts page
     
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          // Skip button (not shown on last page) or Try Fonts button on font page
-          if (isFontPage)
-            TextButton.icon(
-              icon: const Icon(Icons.font_download),
-              label: const Text('Try Fonts'),
-              onPressed: () {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // Font comparison button (only on font page)
+        if (isFontPage)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24.0),
+            child: InkWell(
+              onTap: () {
                 Navigator.push(
                   context, 
-                  MaterialPageRoute(builder: (context) => const FontSettingsScreen())
+                  MaterialPageRoute(builder: (context) => const FontComparisonScreen())
                 );
               },
-              style: TextButton.styleFrom(
-                foregroundColor: AppColors.primary,
-              ),
-            )
-          else if (!isLastPage)
-            TextButton(
-              onPressed: _skipToEnd,
-              child: Text(
-                'Skip',
-                style: TextStyle(
-                  color: AppColors.primary,
-                  fontWeight: FontWeight.w600,
+              borderRadius: BorderRadius.circular(12.0),
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 10.0),
+                decoration: BoxDecoration(
+                  border: Border.all(color: AppColors.primary.withOpacity(0.5)),
+                  borderRadius: BorderRadius.circular(12.0),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.compare, color: AppColors.primary, size: 20),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Compare Fonts with Real Poems',
+                      style: TextStyle(
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            )
-          else
-            const SizedBox.shrink(), // Empty widget when on last page
-            
-          // Next/Get Started button  
-          AppComponents.modernButton(
-            text: isLastPage ? 'Get Started' : 'Next',
-            onPressed: _nextPage,
-            backgroundColor: AppColors.primary,
-            isFullWidth: false,
-            borderRadius: 12.0,
+            ),
           ),
-        ],
-      ),
+          
+        const SizedBox(height: 16.0),
+        
+        // Navigation buttons
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              // Skip button (not shown on last page) or Try Fonts button on font page
+              if (isFontPage)
+                TextButton.icon(
+                  icon: const Icon(Icons.font_download),
+                  label: const Text('Try Fonts'),
+                  onPressed: () {
+                    Navigator.push(
+                      context, 
+                      MaterialPageRoute(builder: (context) => const FontSettingsScreen())
+                    );
+                  },
+                  style: TextButton.styleFrom(
+                    foregroundColor: AppColors.primary,
+                  ),
+                )
+              else if (!isLastPage)
+                TextButton(
+                  onPressed: _skipToEnd,
+                  child: Text(
+                    'Skip',
+                    style: TextStyle(
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                )
+              else
+                const SizedBox.shrink(), // Empty widget when on last page
+                
+              // Next/Get Started button  
+              AppComponents.modernButton(
+                text: isLastPage ? 'Get Started' : 'Next',
+                onPressed: _nextPage,
+                backgroundColor: AppColors.primary,
+                isFullWidth: false,
+                borderRadius: 12.0,
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 

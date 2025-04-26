@@ -5,6 +5,7 @@ import '../controllers/theme_controller.dart';
 import '../components.dart';
 import '../animations.dart';
 import 'main_screen.dart';
+import 'font_comparison_screen.dart';
 
 class FontSettingsScreen extends StatefulWidget {
   const FontSettingsScreen({Key? key}) : super(key: key);
@@ -320,6 +321,31 @@ class _FontSettingsScreenState extends State<FontSettingsScreen> with SingleTick
             _buildFontCard('Lora'),
             _buildFontCard('OpenSans'),
             _buildFontCard('Roboto'),
+            
+            const SizedBox(height: 24),
+            
+            // Font Comparison Button
+            Container(
+              margin: const EdgeInsets.symmetric(horizontal: 4),
+              child: OutlinedButton.icon(
+                onPressed: () {
+                  Navigator.push(
+                    context, 
+                    MaterialPageRoute(builder: (context) => const FontComparisonScreen())
+                  );
+                },
+                icon: const Icon(Icons.compare),
+                label: const Text('Compare Fonts with Real Poems'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppColors.primary,
+                  side: BorderSide(color: AppColors.primary.withOpacity(0.5)),
+                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)
+                  ),
+                ),
+              ),
+            ),
             
             const SizedBox(height: 24),
             
