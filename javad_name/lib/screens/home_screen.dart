@@ -98,41 +98,6 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Javied Nama'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.info_outline),
-            onPressed: () {
-              showAboutDialog(
-                context: context,
-                applicationName: 'Javied Nama',
-                applicationVersion: '1.0.0',
-                children: [
-                  const SizedBox(height: 16),
-                  const Text(
-                    'Developed by Usman Bhat & Hashim Hameem',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  SizedBox(height: 16),
-                  const Text(
-                    'About Allama Iqbal:\nAllama Muhammad Iqbal (1877–1938) was a renowned philosopher, poet, and politician from the Indian subcontinent. He is widely regarded as having inspired the Pakistan Movement and is celebrated for his visionary poetry in Persian and Urdu. Iqbal\'s works explore spiritual revival, selfhood, and the unity of the Muslim world.',
-                  ),
-                  SizedBox(height: 16),
-                  const Text(
-                    'About Javid Nama:\nJavid Nama (The Book of Eternity) is one of Iqbal\'s most famous Persian works, published in 1932. It is a spiritual and philosophical epic, inspired by Dante\'s Divine Comedy, in which Iqbal journeys through the celestial spheres guided by Rumi. The poem explores themes of self-realization, the destiny of humanity, and the quest for truth.',
-                  ),
-                  SizedBox(height: 16),
-                  const Text(
-                    'Javid Nama Timeline:',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  const Text(
-                    '• 1930: Iqbal begins writing Javid Nama.\n• 1932: Javid Nama is published in Persian.\n• 1933–1935: The work is translated into several languages.\n• Today: Javid Nama remains a cornerstone of modern Persian literature and Iqbal studies.'
-                  ),
-                ],
-              );
-            },
-          ),
-        ],
       ),
       body: Column(
         children: [
@@ -260,60 +225,71 @@ class _HomeScreenState extends State<HomeScreen> {
         final poem = poems[index];
         final poemId = poem['_id'] ?? 0;
         final heroTag = 'poem_card_$poemId';
-        return Hero(
-          tag: heroTag,
-          child: Card(
-            child: InkWell(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => PoemDetailScreen(
-                      poemId: poemId,
-                      heroTag: heroTag,
+        
+        // IMPORTANT: Hero is a child of Card, not wrapping the Card
+        // This prevents "Hero widget cannot be the descendant of another Hero" errors
+        return Card(
+          child: Hero(
+            tag: heroTag,
+            // Add transitionOnUserGestures for smoother hero transitions when navigating back
+            transitionOnUserGestures: true,
+            child: Material(
+              color: Colors.transparent, // Keep transparent to respect Card styling
+              child: InkWell(
+                borderRadius: BorderRadius.circular(12),
+                onTap: () {
+                  // Add a slight delay before navigation for better visual effect
+                  Future.delayed(const Duration(milliseconds: 50), () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => PoemDetailScreen(
+                        poemId: poemId,
+                        heroTag: heroTag,
+                      ),
                     ),
-                  ),
-                );
-              },
-              borderRadius: BorderRadius.circular(12),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Text(
-                            poem['title'] ?? 'Untitled',
-                            textAlign: TextAlign.right,
-                            style: Theme.of(context).textTheme.titleMedium,
-                          ),
-                          if (poem['englishTitle'] != null)
-                            Padding(
-                              padding: const EdgeInsets.only(top: 4),
-                              child: Text(
-                                poem['englishTitle'] ?? '',
-                                textAlign: TextAlign.right,
-                                style: Theme.of(context).textTheme.bodySmall,
-                              ),
+                  );
+                  });
+                },
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text(
+                              poem['title'] ?? 'Untitled',
+                              textAlign: TextAlign.right,
+                              style: Theme.of(context).textTheme.titleMedium,
                             ),
-                        ],
+                            if (poem['englishTitle'] != null)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 4),
+                                child: Text(
+                                  poem['englishTitle'] ?? '',
+                                  textAlign: TextAlign.right,
+                                  style: Theme.of(context).textTheme.bodySmall,
+                                ),
+                              ),
+                          ],
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 16),
-                    IconButton(
-                      icon: Icon(
-                        favoritePoems.contains(poemId)
-                            ? Icons.favorite
-                            : Icons.favorite_border,
-                        color: favoritePoems.contains(poemId)
-                            ? Colors.red
-                            : AppColors.primary,
+                      const SizedBox(width: 16),
+                      IconButton(
+                        icon: Icon(
+                          favoritePoems.contains(poemId)
+                              ? Icons.favorite
+                              : Icons.favorite_border,
+                          color: favoritePoems.contains(poemId)
+                              ? Colors.red
+                              : AppColors.primary,
+                        ),
+                        onPressed: () => _toggleFavorite(poemId),
                       ),
-                      onPressed: () => _toggleFavorite(poemId),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),

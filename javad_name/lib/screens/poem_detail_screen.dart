@@ -328,22 +328,31 @@ class _PoemDetailScreenState extends State<PoemDetailScreen> with SingleTickerPr
   }
 
   void _toggleBookmark(int lineId) async {
+    bool isAdding = !bookmarkedLines.contains(lineId);
+    
     setState(() {
-      if (bookmarkedLines.contains(lineId)) {
-        bookmarkedLines.remove(lineId);
-      } else {
+      if (isAdding) {
         bookmarkedLines.add(lineId);
-        Fluttertoast.showToast(
-          msg: "Bookmarked successfully",
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.BOTTOM,
-          backgroundColor: AppColors.primary, 
-          textColor: Colors.white,
-          fontSize: 16.0
-        );
+      } else {
+        bookmarkedLines.remove(lineId);
       }
     });
-    await prefs.setStringList('bookmarks_${widget.poemId}', bookmarkedLines.map((e) => e.toString()).toList());
+    
+    // Update SharedPreferences immediately
+    await prefs.setStringList(
+      'bookmarks_${widget.poemId}', 
+      bookmarkedLines.map((e) => e.toString()).toList()
+    );
+    
+    // Show appropriate toast message
+    Fluttertoast.showToast(
+      msg: isAdding ? "Bookmarked successfully" : "Bookmark removed",
+      toastLength: Toast.LENGTH_SHORT,
+      gravity: ToastGravity.BOTTOM,
+      backgroundColor: isAdding ? AppColors.primary : Colors.grey[700], 
+      textColor: Colors.white,
+      fontSize: 16.0
+    );
   }
 
   void _addNote(int lineId) async {
@@ -556,18 +565,54 @@ class _PoemDetailScreenState extends State<PoemDetailScreen> with SingleTickerPr
 
   @override
   Widget build(BuildContext context) {
+    // NOTE: This build method implements a pattern for safe Hero transitions
+    // that avoids the "Hero widget cannot be the descendant of another Hero" error.
+    // The pattern involves:
+    // 1. Only wrapping the body content with Hero, not the entire Scaffold
+    // 2. Using heroTag: null for FloatingActionButton to prevent conflicts
+    // 3. Using flightShuttleBuilder for smoother animations
     final screenWidth = MediaQuery.of(context).size.width;
     final isTablet = screenWidth > 600;
 
-    // Main content widget that will be wrapped by Hero
-    Widget content = Scaffold(
+    // BUGFIX: Only wrap the body content with Hero, not the entire Scaffold
+    // This prevents "Hero widget cannot be the descendant of another Hero" errors
+    // when displaying SnackBars (which use their own Hero animations)
+    final bodyContent = _isLoading
+        ? _buildLoadingState()
+        : lines.isEmpty
+            ? _buildEmptyState()
+            : _buildPoemContent(isTablet);
+            
+    // Conditionally wrap body content with Hero if heroTag is provided
+    final wrappedBody = widget.heroTag != null
+        ? Hero(
+            tag: widget.heroTag!,
+            // Only apply Hero to the main content, not the Scaffold
+            // Add flightShuttleBuilder for smoother hero transitions
+            flightShuttleBuilder: (_, Animation<double> animation, __, ___, ____) {
+              return AnimatedBuilder(
+                animation: animation,
+                builder: (context, child) {
+                  return Material(
+                    color: Colors.transparent,
+                    child: bodyContent,
+                  );
+                },
+              );
+            },
+            child: bodyContent,
+          )
+        : bodyContent;
+
+    // Return the Scaffold with the potentially Hero-wrapped body
+    return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: _buildAppBar(),
       floatingActionButton: AnimatedSlide(
         duration: const Duration(milliseconds: 300),
         offset: _showAppBar ? Offset.zero : const Offset(0, 2),
         child: FloatingActionButton(
-          heroTag: null,
+          heroTag: null, // Important to prevent conflict with other heroes
           onPressed: _toggleImmersiveMode,
           backgroundColor: AppColors.primary,
           child: Icon(
@@ -576,22 +621,8 @@ class _PoemDetailScreenState extends State<PoemDetailScreen> with SingleTickerPr
           ),
         ),
       ),
-      body: _isLoading
-          ? _buildLoadingState()
-          : lines.isEmpty
-              ? _buildEmptyState()
-              : _buildPoemContent(isTablet),
+      body: wrappedBody,
     );
-
-    // Wrap the content with Hero if heroTag is provided
-    if (widget.heroTag != null) {
-      return Hero(
-        tag: widget.heroTag!,
-        child: content,
-      );
-    } else {
-      return content;
-    }
   }
   
   PreferredSizeWidget _buildAppBar() {
@@ -753,7 +784,9 @@ class _PoemDetailScreenState extends State<PoemDetailScreen> with SingleTickerPr
                             child: InkWell(
                               borderRadius: BorderRadius.circular(16),
                               splashColor: AppColors.primary.withOpacity(0.1),
-                              onTap: () => _toggleExpandLine(index),
+                              onTap: () {
+                                _toggleExpandLine(index);
+                              },
                               onLongPress: () {
                                 showModalBottomSheet(
                                   context: context,
