@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'controllers/theme_controller.dart'; // Import ThemeSettings
 
 class AppColors {
   // Light theme - modern, minimalistic color palette
@@ -33,170 +34,90 @@ class AppColors {
   static const sepiaTextMedium = Color(0xFF614A19);
   static const sepiaTextLight = Color(0xFF7F6542);
   static const sepiaDivider = Color(0xFFE6D5B8);
-
-  // Active theme properties (default to light)
-  static Color get background => _getColor(
-    ThemeType.light,
-    lightBackground,
-    darkBackground,
-    sepiaBackground,
-  );
-  static Color get surface =>
-      _getColor(ThemeType.light, lightSurface, darkSurface, sepiaSurface);
-  static Color get primary =>
-      _getColor(ThemeType.light, lightPrimary, darkPrimary, sepiaPrimary);
-  static Color get primaryLight => _getColor(
-    ThemeType.light,
-    lightPrimaryLight,
-    darkPrimaryLight,
-    sepiaPrimaryLight,
-  );
-  static Color get accent =>
-      _getColor(ThemeType.light, lightAccent, darkAccent, sepiaAccent);
-  static Color get textDark =>
-      _getColor(ThemeType.light, lightTextDark, darkTextDark, sepiaTextDark);
-  static Color get textMedium => _getColor(
-    ThemeType.light,
-    lightTextMedium,
-    darkTextMedium,
-    sepiaTextMedium,
-  );
-  static Color get textLight =>
-      _getColor(ThemeType.light, lightTextLight, darkTextLight, sepiaTextLight);
-  static Color get divider =>
-      _getColor(ThemeType.light, lightDivider, darkDivider, sepiaDivider);
-
-  // Helper method to get color based on theme type
-  static Color _getColor(
-    ThemeType themeType,
-    Color light,
-    Color dark,
-    Color sepia,
-  ) {
-    switch (AppTheme.currentTheme) {
-      case ThemeType.light:
-        return light;
-      case ThemeType.dark:
-        return dark;
-      case ThemeType.sepia:
-        return sepia;
-    }
-  }
 }
 
 enum ThemeType { light, dark, sepia }
 
 class AppTheme {
-  // Current theme state
-  static ThemeType currentTheme = ThemeType.light;
-  
-  // Font family management
-  static String _fontFamily = 'Jameelnoori';
-  static final ValueNotifier<String> fontFamilyNotifier = ValueNotifier(_fontFamily);
-  
-  // Available fonts
   static const List<String> availableFonts = ['Jameelnoori', 'NotoNastaliqUrdu', 'MehrNastaliq', 'Amiri', 'Lora', 'OpenSans', 'Roboto'];
-  
-  // Notifiers to rebuild UI on theme or font size change
-  static final ValueNotifier<ThemeType> themeNotifier = ValueNotifier(currentTheme);
-  static double _fontSize = 1.0; // Scale factor for text size
-  static final ValueNotifier<double> fontSizeNotifier = ValueNotifier(_fontSize);
 
-  // Get font scale factor (used only in PoemDetailScreen)
-  static double get fontSize => _fontSize;
-  
-  // Get current font family
-  static String get fontFamily => _fontFamily;
-
-  // Set font scale factor (used only in PoemDetailScreen)
-  static void setFontSize(double size) {
-    _fontSize = size;
-    fontSizeNotifier.value = size;
-  }
-  
-  // Set font family
-  static void setFontFamily(String family) {
-    if (availableFonts.contains(family)) {
-      _fontFamily = family;
-      fontFamilyNotifier.value = family;
-    }
-  }
-
-  // Set current theme
-  static void setTheme(ThemeType theme) {
-    currentTheme = theme;
-    themeNotifier.value = theme;
-  }
-
-  // Get theme data based on current theme type
-  static ThemeData getTheme() {
-    switch (currentTheme) {
+  static ThemeData buildThemeData(ThemeSettings settings) {
+    switch (settings.themeType) {
       case ThemeType.light:
-        return _getLightTheme();
+        return _getLightTheme(settings);
       case ThemeType.dark:
-        return _getDarkTheme();
+        return _getDarkTheme(settings);
       case ThemeType.sepia:
-        return _getSepiaTheme();
+        return _getSepiaTheme(settings);
     }
   }
 
-  // Light theme configuration
-  static ThemeData _getLightTheme() => _buildTheme(
-    AppColors.lightBackground,
-    AppColors.lightSurface,
-    AppColors.lightPrimary,
-    AppColors.lightPrimaryLight,
-    AppColors.lightAccent,
-    AppColors.lightTextDark,
-    AppColors.lightTextMedium,
-    AppColors.lightTextLight,
-    AppColors.lightDivider,
-    Brightness.light,
-  );
+  static ThemeData _getLightTheme(ThemeSettings settings) {
+    return _buildTheme(
+      settings: settings,
+      background: AppColors.lightBackground,
+      surface: AppColors.lightSurface,
+      primary: AppColors.lightPrimary,
+      primaryLight: AppColors.lightPrimaryLight,
+      accent: AppColors.lightAccent,
+      textDark: AppColors.lightTextDark,
+      textMedium: AppColors.lightTextMedium,
+      textLight: AppColors.lightTextLight,
+      divider: AppColors.lightDivider,
+      brightness: Brightness.light,
+    );
+  }
 
-  // Dark theme configuration
-  static ThemeData _getDarkTheme() => _buildTheme(
-    AppColors.darkBackground,
-    AppColors.darkSurface,
-    AppColors.darkPrimary,
-    AppColors.darkPrimaryLight,
-    AppColors.darkAccent,
-    AppColors.darkTextDark,
-    AppColors.darkTextMedium,
-    AppColors.darkTextLight,
-    AppColors.darkDivider,
-    Brightness.dark,
-  );
+  static ThemeData _getDarkTheme(ThemeSettings settings) {
+    return _buildTheme(
+      settings: settings,
+      background: AppColors.darkBackground,
+      surface: AppColors.darkSurface,
+      primary: AppColors.darkPrimary,
+      primaryLight: AppColors.darkPrimaryLight,
+      accent: AppColors.darkAccent,
+      textDark: AppColors.darkTextDark,
+      textMedium: AppColors.darkTextMedium,
+      textLight: AppColors.darkTextLight,
+      divider: AppColors.darkDivider,
+      brightness: Brightness.dark,
+    );
+  }
 
-  // Sepia theme configuration
-  static ThemeData _getSepiaTheme() => _buildTheme(
-    AppColors.sepiaBackground,
-    AppColors.sepiaSurface,
-    AppColors.sepiaPrimary,
-    AppColors.sepiaPrimaryLight,
-    AppColors.sepiaAccent,
-    AppColors.sepiaTextDark,
-    AppColors.sepiaTextMedium,
-    AppColors.sepiaTextLight,
-    AppColors.sepiaDivider,
-    Brightness.light,
-  );
+  static ThemeData _getSepiaTheme(ThemeSettings settings) {
+    return _buildTheme(
+      settings: settings,
+      background: AppColors.sepiaBackground,
+      surface: AppColors.sepiaSurface,
+      primary: AppColors.sepiaPrimary,
+      primaryLight: AppColors.sepiaPrimaryLight,
+      accent: AppColors.sepiaAccent,
+      textDark: AppColors.sepiaTextDark,
+      textMedium: AppColors.sepiaTextMedium,
+      textLight: AppColors.sepiaTextLight,
+      divider: AppColors.sepiaDivider,
+      brightness: Brightness.light,
+    );
+  }
 
-  // Common theme builder
-  static ThemeData _buildTheme(
-    Color background,
-    Color surface,
-    Color primary,
-    Color primaryLight,
-    Color accent,
-    Color textDark,
-    Color textMedium,
-    Color textLight,
-    Color divider,
-    Brightness brightness,
-  ) {
-    const double uiFontScale = 1.0; // UI font scale is always 1.0 for all screens except PoemDetailScreen
+  static ThemeData _buildTheme({
+    required ThemeSettings settings,
+    required Color background,
+    required Color surface,
+    required Color primary,
+    required Color primaryLight,
+    required Color accent,
+    required Color textDark,
+    required Color textMedium,
+    required Color textLight,
+    required Color divider,
+    required Brightness brightness,
+  }) {
+    final double uiFontScale = settings.fontSizeFactor;
+    final String currentFontFamily = settings.fontFamily;
+
     return ThemeData(
+      fontFamily: currentFontFamily,
       useMaterial3: true,
       brightness: brightness,
       colorScheme: ColorScheme(
@@ -220,7 +141,7 @@ class AppTheme {
         elevation: 0,
         centerTitle: true,
         titleTextStyle: TextStyle(
-          fontFamily: _fontFamily,
+          fontFamily: currentFontFamily,
           color: textDark,
           fontSize: 20 * uiFontScale,
           fontWeight: FontWeight.w600,
@@ -234,15 +155,15 @@ class AppTheme {
         labelTextStyle: MaterialStateProperty.resolveWith((states) {
           if (states.contains(MaterialState.selected)) {
             return TextStyle(
-              color: primary, 
-              fontFamily: _fontFamily,
+              color: primary,
+              fontFamily: currentFontFamily,
               fontSize: 12 * uiFontScale,
               fontWeight: FontWeight.w600,
             );
           }
           return TextStyle(
-            color: textMedium, 
-            fontFamily: _fontFamily,
+            color: textMedium,
+            fontFamily: currentFontFamily,
             fontSize: 12 * uiFontScale,
           );
         }),
@@ -265,41 +186,41 @@ class AppTheme {
       ),
       textTheme: TextTheme(
         displayLarge: TextStyle(
-          fontFamily: _fontFamily,
+          fontFamily: currentFontFamily,
           color: textDark,
           fontSize: 24 * uiFontScale,
           fontWeight: FontWeight.bold,
         ),
         displayMedium: TextStyle(
-          fontFamily: _fontFamily,
+          fontFamily: currentFontFamily,
           color: textDark,
           fontSize: 22 * uiFontScale,
           fontWeight: FontWeight.w600,
         ),
         titleLarge: TextStyle(
-          fontFamily: _fontFamily,
+          fontFamily: currentFontFamily,
           color: textDark,
           fontSize: 20 * uiFontScale,
           fontWeight: FontWeight.w600,
         ),
         titleMedium: TextStyle(
-          fontFamily: _fontFamily,
+          fontFamily: currentFontFamily,
           color: textDark,
           fontSize: 18 * uiFontScale,
           fontWeight: FontWeight.w500,
         ),
         bodyLarge: TextStyle(
-          fontFamily: _fontFamily,
+          fontFamily: currentFontFamily,
           color: textMedium,
           fontSize: 18 * uiFontScale,
         ),
         bodyMedium: TextStyle(
-          fontFamily: _fontFamily,
+          fontFamily: currentFontFamily,
           color: textMedium,
           fontSize: 16 * uiFontScale,
         ),
         bodySmall: TextStyle(
-          fontFamily: _fontFamily,
+          fontFamily: currentFontFamily,
           color: textLight,
           fontSize: 14 * uiFontScale,
         ),
@@ -366,7 +287,4 @@ class AppTheme {
       ),
     );
   }
-
-  // Original theme getter maintained for compatibility
-  static ThemeData get theme => getTheme();
 }
