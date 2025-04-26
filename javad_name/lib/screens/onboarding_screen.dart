@@ -3,7 +3,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../components.dart';
 import '../constants.dart';
 import '../animations.dart';
-// TODO: Import your main app screen, e.g., import 'home_screen.dart';
+import '../components/font_preview_component.dart';
+import 'font_settings_screen.dart';
 
 // Data structure for onboarding content
 class OnboardingPageData {
@@ -38,6 +39,15 @@ final List<OnboardingPageData> onboardingPages = [
     features: [
       FeatureItem(title: "Search", description: "Find poems easily.", icon: Icons.search),
       FeatureItem(title: "View Poems", description: "Read and explore.", icon: Icons.article),
+    ],
+  ),
+  OnboardingPageData(
+    title: "Beautiful Fonts",
+    icon: Icons.font_download, // Font icon
+    features: [
+      FeatureItem(title: "Multiple Font Styles", description: "Choose from Arabic & Latin fonts.", icon: Icons.text_format),
+      FeatureItem(title: "Font Size Control", description: "Adjust text size for comfortable reading.", icon: Icons.format_size),
+      FeatureItem(title: "Rich Typography", description: "Experience beautiful calligraphy.", icon: Icons.brush),
     ],
   ),
   OnboardingPageData(
@@ -174,31 +184,36 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
         mainAxisSize: MainAxisSize.min, // Prevent column from taking more space than needed
         children: [
           const SizedBox(height: 20.0),
-          // Animated icon
-          Center(
-            child: SizedBox( // Constrain the size to prevent potential overflow
-              width: 120,
-              height: 120,
-              child: AppAnimations.fadeScaleIn(
-                child: ScaleTransition(
-                  scale: iconAnimation,
-                  child: Container(
-                    width: 120,
-                    height: 120,
-                    decoration: BoxDecoration(
-                      color: AppColors.primary.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(60),
-                    ),
-                    child: Icon(
-                      page.icon,
-                      size: 60.0,
-                      color: AppColors.primary,
+          // Animated icon (or font preview component for font page)
+          if (page.title == "Beautiful Fonts")
+            // Show font preview component for the font section
+            const FontPreviewComponent()
+          else
+            // Show regular icon for other sections
+            Center(
+              child: SizedBox( // Constrain the size to prevent potential overflow
+                width: 120,
+                height: 120,
+                child: AppAnimations.fadeScaleIn(
+                  child: ScaleTransition(
+                    scale: iconAnimation,
+                    child: Container(
+                      width: 120,
+                      height: 120,
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(60),
+                      ),
+                      child: Icon(
+                        page.icon,
+                        size: 60.0,
+                        color: AppColors.primary,
+                      ),
                     ),
                   ),
                 ),
               ),
             ),
-          ),
           const SizedBox(height: 32.0),
           // Title
           AppAnimations.fadeIn(
@@ -271,14 +286,29 @@ class _OnboardingScreenState extends State<OnboardingScreen> with TickerProvider
 
   Widget _buildButtons() {
     final isLastPage = _currentPage == onboardingPages.length - 1;
+    final isFontPage = _currentPage == 1; // Index 1 is the Beautiful Fonts page
     
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          // Skip button (not shown on last page)
-          if (!isLastPage)
+          // Skip button (not shown on last page) or Try Fonts button on font page
+          if (isFontPage)
+            TextButton.icon(
+              icon: const Icon(Icons.font_download),
+              label: const Text('Try Fonts'),
+              onPressed: () {
+                Navigator.push(
+                  context, 
+                  MaterialPageRoute(builder: (context) => const FontSettingsScreen())
+                );
+              },
+              style: TextButton.styleFrom(
+                foregroundColor: AppColors.primary,
+              ),
+            )
+          else if (!isLastPage)
             TextButton(
               onPressed: _skipToEnd,
               child: Text(

@@ -6,6 +6,7 @@ import '../controllers/theme_controller.dart';
 import 'main_screen.dart';
 import 'how_to_use_screen.dart';
 import 'about_screen.dart';
+import 'font_settings_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({Key? key}) : super(key: key);
@@ -250,30 +251,91 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ),
                   ),
                 ),
-                // Font Family Card
+                // Font Settings Card - Enhanced version
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8),
                   child: Card(
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     elevation: 2,
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          const Text('Font Family', style: TextStyle(fontWeight: FontWeight.bold)),
-                          const SizedBox(height: 12),
-                          DropdownButtonFormField<String>(
-                            value: currentFont,
-                            decoration: const InputDecoration(border: OutlineInputBorder()),
-                            items: AppTheme.availableFonts.map((font) {
-                              return DropdownMenuItem(value: font, child: Text(font, style: TextStyle(fontFamily: font)));
-                            }).toList(),
-                            onChanged: (value) {
-                              if (value != null) _setFontFamily(value);
-                            },
-                          ),
-                        ],
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(12),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const FontSettingsScreen()),
+                        );
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const Text('Font Settings', style: TextStyle(fontWeight: FontWeight.bold)),
+                                Text(
+                                  currentFont,
+                                  style: TextStyle(
+                                    color: AppColors.textMedium,
+                                    fontFamily: currentFont,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 12),
+                            // Font preview
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: AppColors.background.withOpacity(0.5),
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(color: AppColors.divider),
+                              ),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      'جاوید نامہ',
+                                      style: TextStyle(
+                                        fontFamily: currentFont,
+                                        fontSize: 18 * fontSize,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                Icon(
+                                  Icons.font_download_outlined,
+                                  color: AppColors.primary,
+                                  size: 16,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  'Advanced Font Options',
+                                  style: TextStyle(
+                                    color: AppColors.primary,
+                                    fontWeight: FontWeight.w500,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                                const SizedBox(width: 4),
+                                Icon(
+                                  Icons.arrow_forward_ios,
+                                  color: AppColors.primary,
+                                  size: 14,
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
