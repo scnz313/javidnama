@@ -15,7 +15,13 @@ import 'package:flutter/services.dart'; // For clipboard functionality
 class PoemDetailScreen extends StatefulWidget {
   final int poemId;
   final int? initialLineIndex;
-  const PoemDetailScreen({Key? key, required this.poemId, this.initialLineIndex}) : super(key: key);
+  final String? heroTag;
+  const PoemDetailScreen({
+    Key? key,
+    required this.poemId,
+    this.initialLineIndex,
+    this.heroTag,
+  }) : super(key: key);
 
   @override
   State<PoemDetailScreen> createState() => _PoemDetailScreenState();
@@ -553,13 +559,15 @@ class _PoemDetailScreenState extends State<PoemDetailScreen> with SingleTickerPr
     final screenWidth = MediaQuery.of(context).size.width;
     final isTablet = screenWidth > 600;
 
-    return Scaffold(
+    // Main content widget that will be wrapped by Hero
+    Widget content = Scaffold(
       extendBodyBehindAppBar: true,
       appBar: _buildAppBar(),
       floatingActionButton: AnimatedSlide(
         duration: const Duration(milliseconds: 300),
         offset: _showAppBar ? Offset.zero : const Offset(0, 2),
         child: FloatingActionButton(
+          heroTag: null,
           onPressed: _toggleImmersiveMode,
           backgroundColor: AppColors.primary,
           child: Icon(
@@ -574,6 +582,16 @@ class _PoemDetailScreenState extends State<PoemDetailScreen> with SingleTickerPr
               ? _buildEmptyState()
               : _buildPoemContent(isTablet),
     );
+
+    // Wrap the content with Hero if heroTag is provided
+    if (widget.heroTag != null) {
+      return Hero(
+        tag: widget.heroTag!,
+        child: content,
+      );
+    } else {
+      return content;
+    }
   }
   
   PreferredSizeWidget _buildAppBar() {
