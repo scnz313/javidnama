@@ -1,16 +1,17 @@
 import 'dart:convert';
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart'; // For clipboard functionality
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:translator/translator.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:fluttertoast/fluttertoast.dart'; // Add this import
 import 'package:http/http.dart' as http;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../services/translation_service.dart';
 import '../constants.dart';
 import '../controllers/theme_controller.dart';
 import 'package:url_launcher/url_launcher.dart' as launcher;
-import 'package:flutter/services.dart'; // For clipboard functionality
 
 class PoemDetailScreen extends StatefulWidget {
   final int poemId;
@@ -332,14 +333,13 @@ class _PoemDetailScreenState extends State<PoemDetailScreen> with SingleTickerPr
         bookmarkedLines.remove(lineId);
       } else {
         bookmarkedLines.add(lineId);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('Bookmarked successfully'),
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-            backgroundColor: AppColors.primary,
-            duration: const Duration(seconds: 1),
-          ),
+        Fluttertoast.showToast(
+          msg: "Bookmarked successfully",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          backgroundColor: AppColors.primary, 
+          textColor: Colors.white,
+          fontSize: 16.0
         );
       }
     });
@@ -394,14 +394,13 @@ class _PoemDetailScreenState extends State<PoemDetailScreen> with SingleTickerPr
               final map = lineNotes.map((k,v) => MapEntry(k.toString(), v));
               await prefs.setString('notes_poem_${widget.poemId}', jsonEncode(map));
               if (mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: const Text('Note saved'),
-                    behavior: SnackBarBehavior.floating,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                    backgroundColor: AppColors.primary,
-                    duration: const Duration(seconds: 1),
-                  ),
+                Fluttertoast.showToast(
+                  msg: "Note saved",
+                  toastLength: Toast.LENGTH_SHORT,
+                  gravity: ToastGravity.BOTTOM,
+                  backgroundColor: AppColors.primary,
+                  textColor: Colors.white,
+                  fontSize: 16.0
                 );
               }
               Navigator.pop(context);
@@ -436,16 +435,17 @@ class _PoemDetailScreenState extends State<PoemDetailScreen> with SingleTickerPr
     try {
       await Share.share(text, subject: 'Line from Javied Nama');
     } catch (e) {
+      debugPrint('Error sharing line: $e'); // Add this line to log the error
       // Fallback sharing method
       await Clipboard.setData(ClipboardData(text: text));
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('Line copied to clipboard'),
-            behavior: SnackBarBehavior.floating,
-            duration: const Duration(seconds: 1),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-          ),
+      if (mounted) { // Keep the mounted check
+        Fluttertoast.showToast(
+          msg: "Sharing failed. Line copied to clipboard.",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          backgroundColor: Colors.grey[700], // Example color
+          textColor: Colors.white,
+          fontSize: 16.0
         );
       }
     }
@@ -460,13 +460,13 @@ class _PoemDetailScreenState extends State<PoemDetailScreen> with SingleTickerPr
       final fallbackText = lines.map((l) => l['line_text'] ?? '').join('\n');
       await Clipboard.setData(ClipboardData(text: fallbackText));
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('Poem copied to clipboard'),
-            behavior: SnackBarBehavior.floating,
-            duration: const Duration(seconds: 1),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-          ),
+        Fluttertoast.showToast(
+          msg: "Sharing failed. Poem copied to clipboard.",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          backgroundColor: Colors.grey[700],
+          textColor: Colors.white,
+          fontSize: 16.0
         );
       }
     }
@@ -1041,13 +1041,13 @@ class _PoemDetailScreenState extends State<PoemDetailScreen> with SingleTickerPr
             await Clipboard.setData(ClipboardData(text: line['line_text'] ?? ''));
             Navigator.pop(context);
             if (mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: const Text('Text copied to clipboard'),
-                  behavior: SnackBarBehavior.floating,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                  duration: const Duration(seconds: 1),
-                ),
+              Fluttertoast.showToast(
+                msg: "Text copied to clipboard",
+                toastLength: Toast.LENGTH_SHORT,
+                gravity: ToastGravity.BOTTOM,
+                backgroundColor: Colors.grey[700],
+                textColor: Colors.white,
+                fontSize: 16.0
               );
             }
           },
