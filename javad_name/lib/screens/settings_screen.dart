@@ -4,6 +4,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../constants.dart';
 import '../controllers/theme_controller.dart';
 import 'main_screen.dart';
+import 'how_to_use_screen.dart';
+import 'about_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({Key? key}) : super(key: key);
@@ -18,6 +20,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool autoSaveNotes = true;
   double fontSize = 1.0;
   String currentTheme = 'light';
+  String currentFont = 'Jameelnoori';
   bool _isLoading = true;
 
   @override
@@ -35,6 +38,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         autoSaveNotes = prefs.getBool('autoSaveNotes') ?? true;
         fontSize = prefs.getDouble('font_size_factor') ?? 1.0;
         currentTheme = prefs.getString('theme_preference') ?? 'light';
+        currentFont = prefs.getString('font_family_preference') ?? 'Jameelnoori';
         _isLoading = false;
       });
     } catch (e) {
@@ -124,6 +128,33 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
+  Future<void> _setFontFamily(String fontFamily) async {
+    if (fontFamily == currentFont) return;
+    
+    try {
+      await prefs.setString('font_family_preference', fontFamily);
+      AppTheme.setFontFamily(fontFamily);
+      setState(() => currentFont = fontFamily);
+      
+      // Refresh the UI to show the new font
+      if (mounted) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => const MainScreen()),
+        );
+      }
+    } catch (e) {
+      debugPrint('Error changing font: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error changing font: $e'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    }
+  }
+
   Future<void> _clearData(String type) async {
     final confirmed = await showDialog<bool>(
       context: context,
@@ -185,134 +216,183 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   child: Text(
                     'Theme Settings',
                     style: TextStyle(
-                      fontSize: 14,
+                      fontSize: 16,
                       fontWeight: FontWeight.bold,
                       color: AppColors.primary,
-                      letterSpacing: 0.5,
                     ),
                   ),
                 ),
-                Card(
-                  child: Column(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text('App Theme', style: TextStyle(fontWeight: FontWeight.bold)),
-                            const SizedBox(height: 12),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: [
-                                _themeOption('Light', 'light', Icons.light_mode, AppColors.lightBackground, AppColors.lightSurface, AppColors.lightPrimary),
-                                _themeOption('Dark', 'dark', Icons.dark_mode, AppColors.darkBackground, AppColors.darkSurface, AppColors.darkPrimary),
-                                _themeOption('Sepia', 'sepia', Icons.auto_stories, AppColors.sepiaBackground, AppColors.sepiaSurface, AppColors.sepiaPrimary),
-                              ],
-                            ),
-                          ],
+                // Theme Card
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: Card(
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    elevation: 2,
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          const Text('App Theme', style: TextStyle(fontWeight: FontWeight.bold)),
+                          const SizedBox(height: 12),
+                          Wrap(
+                            spacing: 16,
+                            runSpacing: 12,
+                            alignment: WrapAlignment.center,
+                            children: [
+                              _themeOption('Light', 'light', Icons.light_mode, AppColors.lightBackground, AppColors.lightSurface, AppColors.lightPrimary),
+                              _themeOption('Dark', 'dark', Icons.dark_mode, AppColors.darkBackground, AppColors.darkSurface, AppColors.darkPrimary),
+                              _themeOption('Sepia', 'sepia', Icons.auto_stories, AppColors.sepiaBackground, AppColors.sepiaSurface, AppColors.sepiaPrimary),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                // Font Family Card
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: Card(
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    elevation: 2,
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          const Text('Font Family', style: TextStyle(fontWeight: FontWeight.bold)),
+                          const SizedBox(height: 12),
+                          DropdownButtonFormField<String>(
+                            value: currentFont,
+                            decoration: const InputDecoration(border: OutlineInputBorder()),
+                            items: AppTheme.availableFonts.map((font) {
+                              return DropdownMenuItem(value: font, child: Text(font, style: TextStyle(fontFamily: font)));
+                            }).toList(),
+                            onChanged: (value) {
+                              if (value != null) _setFontFamily(value);
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                // Display Settings Section Header
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: Text(
+                    'Display Settings',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                ),
+                // Display Settings Card
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: Card(
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    elevation: 2,
+                    child: Column(
+                      children: [
+                        SwitchListTile(
+                          title: const Text('Show Translations'),
+                          subtitle: const Text('Display translations under each line'),
+                          value: showTranslations,
+                          onChanged: (value) => setState(() { showTranslations = value; _saveSettings(); }),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                         ),
-                      ),
-                      const Divider(),
-                      Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text('Font Size', style: TextStyle(fontWeight: FontWeight.bold)),
-                            const SizedBox(height: 16),
-                            Row(
-                              children: [
-                                const Text('A', style: TextStyle(fontSize: 14)),
-                                Expanded(
-                                  child: Slider(
-                                    value: fontSize,
-                                    min: 0.8,
-                                    max: 1.5,
-                                    divisions: 7,
-                                    label: '${(fontSize * 100).round()}%',
-                                    onChanged: (value) => setState(() => fontSize = value),
-                                    onChangeEnd: _setFontSize,
-                                  ),
-                                ),
-                                const Text('A', style: TextStyle(fontSize: 24)),
-                              ],
-                            ),
-                            Center(child: Text('Preview Text', style: TextStyle(fontSize: 16 * fontSize, fontFamily: 'Jameelnoori'))),
-                          ],
+                        const Divider(height: 1, indent: 16, endIndent: 16),
+                        SwitchListTile(
+                          title: const Text('Auto-save Notes'),
+                          subtitle: const Text('Automatically save notes while typing'),
+                          value: autoSaveNotes,
+                          onChanged: (value) => setState(() { autoSaveNotes = value; _saveSettings(); }),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
                 const SizedBox(height: 24),
+                // Data Management Section Header
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8),
-                  child: Text('Display Settings', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.primary, letterSpacing: 0.5)),
+                  child: Text(
+                    'Data Management',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.primary,
+                    ),
+                  ),
                 ),
-                Card(
-                  child: Column(
-                    children: [
-                      SwitchListTile(
-                        title: const Text('Show Translations'),
-                        subtitle: const Text('Display translations under each line'),
-                        value: showTranslations,
-                        onChanged: (value) => setState(() { showTranslations = value; _saveSettings(); }),
-                      ),
-                      SwitchListTile(
-                        title: const Text('Auto-save Notes'),
-                        subtitle: const Text('Automatically save notes while typing'),
-                        value: autoSaveNotes,
-                        onChanged: (value) => setState(() { autoSaveNotes = value; _saveSettings(); }),
-                      ),
-                    ],
+                // Data Management Card
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: Card(
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    elevation: 2,
+                    child: Column(
+                      children: [
+                        ListTile(
+                          title: const Text('Clear Bookmarks'),
+                          leading: const Icon(Icons.bookmark_remove_outlined),
+                          trailing: const Icon(Icons.chevron_right),
+                          onTap: () => _clearData('bookmarks'),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        ),
+                        const Divider(height: 1, indent: 16, endIndent: 16),
+                        ListTile(
+                          title: const Text('Clear Notes'),
+                          leading: const Icon(Icons.note_alt_outlined),
+                          trailing: const Icon(Icons.chevron_right),
+                          onTap: () => _clearData('notes'),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
                 const SizedBox(height: 24),
+                // How to Use & About Section (moved below Data Management)
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8),
-                  child: Text('Data Management', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.primary, letterSpacing: 0.5)),
-                ),
-                Card(
-                  child: Column(
-                    children: [
-                      ListTile(
-                        title: const Text('Clear Bookmarks'),
-                        leading: const Icon(Icons.bookmark_remove),
-                        trailing: const Icon(Icons.chevron_right),
-                        onTap: () => _clearData('bookmarks'),
-                      ),
-                      const Divider(height: 1),
-                      ListTile(
-                        title: const Text('Clear Notes'),
-                        leading: const Icon(Icons.note_alt_outlined),
-                        trailing: const Icon(Icons.chevron_right),
-                        onTap: () => _clearData('notes'),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 24),
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8),
-                  child: Text('About', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.primary, letterSpacing: 0.5)),
-                ),
-                Card(
-                  child: Column(
-                    children: [
-                      ListTile(
-                        title: const Text('Version'),
-                        subtitle: const Text('1.0.0'),
-                        leading: const Icon(Icons.info_outline),
-                      ),
-                      const Divider(height: 1),
-                      ListTile(
-                        title: const Text('Feedback'),
-                        subtitle: const Text('Send comments or report issues'),
-                        leading: const Icon(Icons.feedback_outlined),
-                        onTap: () {},
-                      ),
-                    ],
+                  child: Card(
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    elevation: 2,
+                    child: Column(
+                      children: [
+                        ListTile(
+                          leading: const Icon(Icons.help_outline),
+                          title: const Text('How to Use the App'),
+                          subtitle: const Text('Learn about all features and functionalities'),
+                          trailing: const Icon(Icons.chevron_right),
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => const HowToUseScreen()),
+                            );
+                          },
+                        ),
+                        const Divider(height: 1, indent: 16, endIndent: 16),
+                        ListTile(
+                          leading: const Icon(Icons.info_outline),
+                          title: const Text('About'),
+                          subtitle: const Text('Learn about Javied Nama and its developers'),
+                          trailing: const Icon(Icons.chevron_right),
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => const AboutScreen()),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ],

@@ -13,14 +13,19 @@ dependencies:
   shared_preferences: ^2.0.15
   http: ^0.13.5
   translator: ^0.1.7
-  share_plus: ^8.0.0
+  share_plus: ^4.0.4
   cloud_firestore: ^4.8.0
   dio: ^5.3.2
   flutter_secure_storage: ^8.0.0
   logger: ^1.3.0
   flutter_web_plugins:
     sdk: flutter
-
+  cloud_functions: ^4.5.0
+  flutter_riverpod: ^2.6.1
+  package_info_plus: ^8.3.0
+  sqflite: ^2.4.2
+  path_provider: ^2.1.5
+  url_launcher: ^6.2.1
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -37,3 +42,21 @@ flutter:
     - family: Jameelnoori
       fonts:
         - asset: assets/fonts/Jameelnoori.ttf
+    - family: NotoNastaliqUrdu
+      fonts:
+        - asset: assets/fonts/NotoNastaliqUrdu-Regular.ttf
+    - family: MehrNastaliq
+      fonts:
+        - asset: assets/fonts/MehrNastaliq.ttf
+    - family: Amiri
+      fonts:
+        - asset: assets/fonts/Amiri-Regular.ttf
+    - family: Lora
+      fonts:
+        - asset: assets/fonts/Lora-Regular.ttf
+    - family: OpenSans
+      fonts:
+        - asset: assets/fonts/OpenSans-Regular.ttf
+    - family: Roboto
+      fonts:
+        - asset: assets/fonts/Roboto-Regular.ttf

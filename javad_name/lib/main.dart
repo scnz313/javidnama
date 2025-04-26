@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'firebase_options.dart';
 import 'constants.dart';
 import 'screens/main_screen.dart';
 import 'controllers/theme_controller.dart';
+
+// Only import web plugins when running on web
+// This avoids the dart:ui_web errors on non-web platforms
+import 'package:flutter_web_plugins/url_strategy.dart' if (dart.library.html) 'package:flutter_web_plugins/flutter_web_plugins.dart';
 
 Future<void> main() async {
   debugPrint = (String? message, {int? wrapWidth}) {
@@ -19,10 +25,14 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  // Store Gemini API key in secure storage
-  const storage = FlutterSecureStorage();
-  await storage.write(key: 'GEMINI_API_KEY', value: 'AIzaSyCFdjGYZnRVzi0BoZNZyjxektA_9cfCAcM');
-  runApp(const MyApp());
+  
+  // Only use web-specific URL strategy when on web platform
+  if (kIsWeb) {
+    // Configure URL strategy for web only
+    usePathUrlStrategy();
+  }
+  
+  runApp(const ProviderScope(child: MyApp()));
 }
 
 class MyApp extends StatefulWidget {

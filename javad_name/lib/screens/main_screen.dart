@@ -28,36 +28,38 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: IndexedStack(
-        index: _selectedIndex,
-        children: _screens,
-      ),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _selectedIndex,
-        onDestinationSelected: _onTabSelected,
-        backgroundColor: AppColors.surface,
-        elevation: 0,
-        height: 64,
-        indicatorColor: AppColors.primaryLight.withOpacity(0.2),
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.home_outlined),
-            selectedIcon: Icon(Icons.home),
-            label: 'Home',
+    return ValueListenableBuilder<ThemeType>(
+      valueListenable: AppTheme.themeNotifier,
+      builder: (context, themeType, _) {
+        return Scaffold(
+          body: IndexedStack(
+            index: _selectedIndex,
+            children: _screens,
           ),
-          NavigationDestination(
-            icon: Icon(Icons.bookmark_border_outlined),
-            selectedIcon: Icon(Icons.bookmark),
-            label: 'Bookmarks',
+          bottomNavigationBar: NavigationBar(
+            selectedIndex: _selectedIndex,
+            onDestinationSelected: _onTabSelected,
+            labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
+            destinations: const [
+              NavigationDestination(
+                icon: Icon(Icons.home_outlined),
+                selectedIcon: Icon(Icons.home),
+                label: 'Home',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.bookmark_border_outlined),
+                selectedIcon: Icon(Icons.bookmark),
+                label: 'Bookmarks',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.settings_outlined),
+                selectedIcon: Icon(Icons.settings),
+                label: 'Settings',
+              ),
+            ],
           ),
-          NavigationDestination(
-            icon: Icon(Icons.settings_outlined),
-            selectedIcon: Icon(Icons.settings),
-            label: 'Settings',
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 }

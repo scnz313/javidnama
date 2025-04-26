@@ -1,0 +1,73 @@
+import 'dart:async';
+
+class SearchResult {
+  final int poemId;
+  final String poemTitle;
+  final String? matchLine;
+  final int? lineIndex;
+
+  SearchResult({
+    required this.poemId,
+    required this.poemTitle,
+    this.matchLine,
+    this.lineIndex,
+  });
+}
+
+class SearchService {
+  static final SearchService instance = SearchService._();
+  SearchService._();
+
+  List<_SearchablePoem> _poems = [];
+
+  Future<void> init(List<dynamic> poems) async {
+    _poems = poems.map((poem) {
+      final id = poem['_id'] ?? 0;
+      final title = poem['title'] ?? '';
+      final englishTitle = poem['englishTitle'] ?? '';
+      final lines = (poem['lines'] as List?)?.map((l) => l.toString()).toList() ?? [];
+      return _SearchablePoem(
+        id: id,
+        title: title,
+        englishTitle: englishTitle,
+        lines: lines,
+      );
+    }).toList();
+  }
+
+  /// filter: 0=all, 1=titles, 2=lines
+  Future<List<SearchResult>> search(String query, {int filter = 0, String? language}) async {
+    final q = query.toLowerCase();
+    final List<SearchResult> results = [];
+    for (final poem in _poems) {
+      bool added = false;
+      if (filter == 0 || filter == 1) {
+        // Title match
+        if (poem.title.toLowerCase().contains(q) || poem.englishTitle.toLowerCase().contains(q)) {
+          results.add(SearchResult(poemId: poem.id, poemTitle: poem.title, matchLine: null, lineIndex: null));
+          added = true;
+        }
+      }
+      if (!added && (filter == 0 || filter == 2)) {
+        // Line match
+        for (int i = 0; i < poem.lines.length; i++) {
+          final line = poem.lines[i];
+          // (Future: filter by language if line objects have language info)
+          if (line.toLowerCase().contains(q)) {
+            results.add(SearchResult(poemId: poem.id, poemTitle: poem.title, matchLine: line, lineIndex: i));
+            break; // Only first match per poem for now
+          }
+        }
+      }
+    }
+    return results;
+  }
+}
+
+class _SearchablePoem {
+  final int id;
+  final String title;
+  final String englishTitle;
+  final List<String> lines;
+  _SearchablePoem({required this.id, required this.title, required this.englishTitle, required this.lines});
+} 

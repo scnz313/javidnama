@@ -89,18 +89,37 @@ enum ThemeType { light, dark, sepia }
 class AppTheme {
   // Current theme state
   static ThemeType currentTheme = ThemeType.light;
+  
+  // Font family management
+  static String _fontFamily = 'Jameelnoori';
+  static final ValueNotifier<String> fontFamilyNotifier = ValueNotifier(_fontFamily);
+  
+  // Available fonts
+  static const List<String> availableFonts = ['Jameelnoori', 'NotoNastaliqUrdu', 'MehrNastaliq', 'Amiri', 'Lora', 'OpenSans', 'Roboto'];
+  
   // Notifiers to rebuild UI on theme or font size change
   static final ValueNotifier<ThemeType> themeNotifier = ValueNotifier(currentTheme);
   static double _fontSize = 1.0; // Scale factor for text size
   static final ValueNotifier<double> fontSizeNotifier = ValueNotifier(_fontSize);
 
-  // Get font scale factor
+  // Get font scale factor (used only in PoemDetailScreen)
   static double get fontSize => _fontSize;
+  
+  // Get current font family
+  static String get fontFamily => _fontFamily;
 
-  // Set font scale factor
+  // Set font scale factor (used only in PoemDetailScreen)
   static void setFontSize(double size) {
     _fontSize = size;
     fontSizeNotifier.value = size;
+  }
+  
+  // Set font family
+  static void setFontFamily(String family) {
+    if (availableFonts.contains(family)) {
+      _fontFamily = family;
+      fontFamilyNotifier.value = family;
+    }
   }
 
   // Set current theme
@@ -176,6 +195,7 @@ class AppTheme {
     Color divider,
     Brightness brightness,
   ) {
+    const double uiFontScale = 1.0; // UI font scale is always 1.0 for all screens except PoemDetailScreen
     return ThemeData(
       useMaterial3: true,
       brightness: brightness,
@@ -200,12 +220,41 @@ class AppTheme {
         elevation: 0,
         centerTitle: true,
         titleTextStyle: TextStyle(
-          fontFamily: 'Jameelnoori',
+          fontFamily: _fontFamily,
           color: textDark,
-          fontSize: 20 * _fontSize,
+          fontSize: 20 * uiFontScale,
           fontWeight: FontWeight.w600,
         ),
         iconTheme: IconThemeData(color: primary),
+      ),
+      navigationBarTheme: NavigationBarThemeData(
+        backgroundColor: surface,
+        elevation: 3,
+        indicatorColor: primary.withOpacity(0.2),
+        labelTextStyle: MaterialStateProperty.resolveWith((states) {
+          if (states.contains(MaterialState.selected)) {
+            return TextStyle(
+              color: primary, 
+              fontFamily: _fontFamily,
+              fontSize: 12 * uiFontScale,
+              fontWeight: FontWeight.w600,
+            );
+          }
+          return TextStyle(
+            color: textMedium, 
+            fontFamily: _fontFamily,
+            fontSize: 12 * uiFontScale,
+          );
+        }),
+        iconTheme: MaterialStateProperty.resolveWith((states) {
+          if (states.contains(MaterialState.selected)) {
+            return IconThemeData(color: primary);
+          }
+          return IconThemeData(color: textMedium);
+        }),
+        shadowColor: primary.withOpacity(0.1),
+        surfaceTintColor: Colors.transparent,
+        height: 64,
       ),
       cardTheme: CardTheme(
         color: surface,
@@ -216,43 +265,43 @@ class AppTheme {
       ),
       textTheme: TextTheme(
         displayLarge: TextStyle(
-          fontFamily: 'Jameelnoori',
+          fontFamily: _fontFamily,
           color: textDark,
-          fontSize: 24 * _fontSize,
+          fontSize: 24 * uiFontScale,
           fontWeight: FontWeight.bold,
         ),
         displayMedium: TextStyle(
-          fontFamily: 'Jameelnoori',
+          fontFamily: _fontFamily,
           color: textDark,
-          fontSize: 22 * _fontSize,
+          fontSize: 22 * uiFontScale,
           fontWeight: FontWeight.w600,
         ),
         titleLarge: TextStyle(
-          fontFamily: 'Jameelnoori',
+          fontFamily: _fontFamily,
           color: textDark,
-          fontSize: 20 * _fontSize,
+          fontSize: 20 * uiFontScale,
           fontWeight: FontWeight.w600,
         ),
         titleMedium: TextStyle(
-          fontFamily: 'Jameelnoori',
+          fontFamily: _fontFamily,
           color: textDark,
-          fontSize: 18 * _fontSize,
+          fontSize: 18 * uiFontScale,
           fontWeight: FontWeight.w500,
         ),
         bodyLarge: TextStyle(
-          fontFamily: 'Jameelnoori',
+          fontFamily: _fontFamily,
           color: textMedium,
-          fontSize: 18 * _fontSize,
+          fontSize: 18 * uiFontScale,
         ),
         bodyMedium: TextStyle(
-          fontFamily: 'Jameelnoori',
+          fontFamily: _fontFamily,
           color: textMedium,
-          fontSize: 16 * _fontSize,
+          fontSize: 16 * uiFontScale,
         ),
         bodySmall: TextStyle(
-          fontFamily: 'Jameelnoori',
+          fontFamily: _fontFamily,
           color: textLight,
-          fontSize: 14 * _fontSize,
+          fontSize: 14 * uiFontScale,
         ),
       ),
       iconTheme: IconThemeData(color: primary, size: 24),
